@@ -19,7 +19,8 @@ log.info("main", "uart demo")
 local UART_ID, sendQueue = 1, {}
 local UART_ID2, sendQueue2 = 2, {}
 local UART_ID3, sendQueue3 = 3, {}
-
+local UART_ID4, sendQueue4 = 4, {}
+local UART_ID5, sendQueue5 = 5, {}
 -- 串口超时，串口准备好后发布的消息
 --例子是100ms，按需求改
 local uartimeout, recvReady = 100, "UART_RECV_ID"
@@ -44,7 +45,18 @@ local result3 = uart.setup(
     8,--数据位
     1--停止位
 )
-
+local result4 = uart.setup(
+    UART_ID4,--串口id
+    115200,--波特率
+    8,--数据位
+    1--停止位
+)
+local result5 = uart.setup(
+    UART_ID5,--串口id
+    115200,--波特率
+    8,--数据位
+    1--停止位
+)
 
 uart.on(UART_ID, "receive", function(uid, length)
     local s
@@ -78,6 +90,26 @@ uart.on(UART_ID3, "receive", function(uid, length)
     sys.timerStart(sys.publish, uartimeout, recvReady)
 end)
 
+uart.on(UART_ID4, "receive", function(uid, length)
+    local s4
+    while true do--保证读完不能丢包
+        s4 = uart.read(uid, length)
+        if #s4 == 0 then break end
+        table.insert(sendQueue4, s4)
+    end
+    sys.timerStart(sys.publish, uartimeout, recvReady)
+end)
+
+uart.on(UART_ID5, "receive", function(uid, length)
+    local s5
+    while true do--保证读完不能丢包
+        s5 = uart.read(uid, length)
+        if #s5 == 0 then break end
+        table.insert(sendQueue5, s5)
+    end
+    sys.timerStart(sys.publish, uartimeout, recvReady)
+end)
+
 
 -- 向串口发送收到的字符串
 sys.subscribe(recvReady, function()
@@ -85,15 +117,21 @@ sys.subscribe(recvReady, function()
     local str = table.concat(sendQueue)
     local str2 = table.concat(sendQueue2)
     local str3 = table.concat(sendQueue3)
+    local str4 = table.concat(sendQueue4)
+    local str5 = table.concat(sendQueue5)
     -- 串口的数据读完后清空缓冲区
     sendQueue = {}
     sendQueue2 = {}
     sendQueue3 = {}
+    sendQueue4 = {}
+    sendQueue5 = {}
     --注意打印会影响运行速度，调试完注释掉
     --log.info("uartTask.read length", #str, str:sub(1,100))
     uart.write(UART_ID,str) --回复
     uart.write(UART_ID2,str2) --回复
     uart.write(UART_ID3,str3) --回复
+    uart.write(UART_ID4,str4) --回复
+    uart.write(UART_ID5,str5) --回复
     --在这里处理接收到的数据，这是例子
 end)
 
