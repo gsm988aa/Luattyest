@@ -1,6 +1,6 @@
 
 PROJECT = "main"
-VERSION = "1.0.0"
+VERSION = "1.0.4"
 
 log.info("main", PROJECT, VERSION)
 
@@ -12,15 +12,10 @@ if wdt then
     wdt.init(15000)--初始化watchdog设置为15s
     sys.timerLoopStart(wdt.feed, 10000)--10s喂一次狗
 end
-require "timer"
 
--- require "test"
-require "gpios"
-require "testMsgPub"
-require "testMsgSub"
-require "gpios"
-require "uart5"
 
+-- require "uart5"
+require "uart6"
 sys.init(0, 0)
 -- 用户代码已结束---------------------------------------------
 -- 结尾总是这一句
